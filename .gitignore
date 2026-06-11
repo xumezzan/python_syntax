@@ -1,0 +1,14 @@
+# зависимости и сборка
+node_modules/
+.next/
+out/
+
+# рантайм-данные синхронизации (в проде — Railway Volume)
+platform/data/
+data/
+
+# системное
+.DS_Store
+*.log
+.env*
+!.env.example

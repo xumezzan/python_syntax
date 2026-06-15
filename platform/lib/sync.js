@@ -57,12 +57,30 @@ export async function pullProgress(code) {
   return true;
 }
 
-/** Автопуш: дебаунс после каждого изменения прогресса. Вызвать один раз. */
+/** Есть ли уже какой-то прогресс (чтобы не заводить код для случайного гостя). */
+function hasProgress() {
+  const p = getProgress();
+  return (p.xp || 0) > 0 || Object.keys(p.lessons || {}).length > 0 || p.onboarded;
+}
+
+/**
+ * Автосинхронизация + авто-узнавание. Вызвать один раз (подписано в TopBar).
+ * Как только появляется хоть какой-то прогресс — сами заводим код синхронизации
+ * и бэкапим прогресс на сервер. Поэтому прогресс не теряется при очистке кэша,
+ * а на другом устройстве восстанавливается по этому коду — без регистрации.
+ */
 export function startAutoSync() {
   if (typeof window === 'undefined' || window.__pysAutoSync) return;
   window.__pysAutoSync = true;
+
+  const ensureCode = () => {
+    if (!getSyncCode() && hasProgress()) enableSync(); // создаёт код и пушит прогресс
+  };
+  ensureCode(); // у возвращающегося ученика прогресс уже есть — бэкапим сразу
+
   let timer = null;
   window.addEventListener(PROGRESS_EVENT, () => {
+    ensureCode(); // первое действие новичка → заводим код и начинаем бэкапить
     if (!getSyncCode()) return;
     clearTimeout(timer);
     timer = setTimeout(pushProgress, 1500);

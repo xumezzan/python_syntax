@@ -237,25 +237,32 @@ function SyncSection() {
 
   return (
     <section className="profile-sec">
-      <h2>Синхронизация устройств</h2>
+      <h2>Твой прогресс и вход</h2>
       <div className="sync-card">
         {code ? (
-          <div className="sync-row">
-            <span>Твой код:</span>
-            <code className="sync-code">{code}</code>
-            <button className="btn" onClick={() => navigator.clipboard?.writeText(code)}>
-              Копировать
-            </button>
-            <span className="sync-note">прогресс сохраняется автоматически</span>
-          </div>
+          <>
+            <div className="sync-row">
+              <span>✓ Прогресс сохраняется автоматически. Твой код для входа:</span>
+            </div>
+            <div className="sync-row">
+              <code className="sync-code">{code}</code>
+              <button className="btn" onClick={() => navigator.clipboard?.writeText(code)}>
+                Копировать
+              </button>
+              <span className="sync-note">
+                запиши его — это ключ, чтобы продолжить на другом устройстве или
+                восстановить прогресс после очистки браузера
+              </span>
+            </div>
+          </>
         ) : (
           <div className="sync-row">
-            <span>Учись с телефона и компьютера — без регистрации и почты.</span>
-            <button className="btn primary" onClick={create}>Создать код синхронизации</button>
+            <span>Код появится сам, как только начнёшь учиться. Или создай сейчас:</span>
+            <button className="btn primary" onClick={create}>Создать код входа</button>
           </div>
         )}
         <div className="sync-row">
-          <span>Есть код с другого устройства?</span>
+          <span>Входишь с другого устройства? Введи свой код:</span>
           <input
             className="sync-input"
             value={input}

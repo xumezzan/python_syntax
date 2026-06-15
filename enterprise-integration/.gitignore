@@ -1,0 +1,11 @@
+# секреты и локальные данные — НЕ коммитим
+.env
+*.db
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/

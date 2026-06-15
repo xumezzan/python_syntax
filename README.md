@@ -1,19 +1,42 @@
-# 🐍 PySyntax — платформа для изучения Python-синтаксиса с нуля
+# 🐍 PySyntax — платформа обучения Python: от синтаксиса до enterprise-интеграций
 
-Интерактивный курс: теория + код в браузере + автотесты + подсказки + XP/стрики.
+Интерактивные треки: теория + код в браузере + автотесты + подсказки + XP/стрики.
+
+**Два трека:**
+1. **Python-синтаксис с нуля** — 10 модулей, 99 уроков (главная страница).
+2. **Python Backend: API, базы данных и интеграции** — 18 модулей, 128 уроков
+   (`/track/backend`). Завершается реальным проектом `enterprise-integration/`.
 
 ## Структура
 
 ```
 python_syntax/
-├── docs/DESIGN.md  ← дизайн-система и продуктовая стратегия
-└── platform/       ← веб-приложение (Next.js + Monaco + Pyodide)
-    ├── content/    ← весь контент курса (10 модулей, 99 уроков, markdown)
+├── docs/DESIGN.md          ← дизайн-система и продуктовая стратегия
+├── enterprise-integration/ ← финальный проект backend-трека: FastAPI + PostgreSQL
+│                             + SQLAlchemy + Alembic + JWT + Docker + pytest (mock SAP/банк)
+└── platform/               ← веб-приложение (Next.js + Monaco + Pyodide)
+    ├── content/            ← контент синтаксис-курса (10 модулей, markdown)
     │   ├── 00-структура-курса.md   — формат уроков, правила XP, бейджи
-    │   └── module-01..10.md        — уроки: теория, задачи, подсказки, автотесты
-    ├── app/ components/ lib/       — код платформы
+    │   ├── module-01..10.md        — уроки синтаксис-курса
+    │   └── backend/                ← контент backend-трека (18 модулей)
+    │       ├── 00-структура.md     — карта трека и особенности авто-проверки
+    │       └── module-01..18.md    — HTTP, JSON, REST, FastAPI, SQL, ORM, …, SAP, финал
+    ├── app/ components/ lib/       — код платформы (треки, карта, плеер, профиль)
     └── public/py-worker.js         — Python-песочница в Web Worker
 ```
+
+## Учебные треки
+
+- **Главная (`/`)** — синтаксис-курс + карточка-баннер «Что дальше» с переходом
+  в backend-трек.
+- **Роудмап (`/roadmap`)** — путь обучения: синтаксис → backend → финальный проект,
+  с прогрессом по каждому треку.
+- **Страница трека (`/track/backend`)** — герой с роудмапом, блок «зачем в работе»,
+  карточки модулей со статусами (не начат / в процессе / завершён), карточка
+  финального проекта и чеклист навыков.
+- Прогресс, XP, уровни, бейджи — единые на оба трека (`localStorage`). Глобальные id
+  модулей сквозные (синтаксис 1–10, backend 11–28), поэтому ключи прогресса и роуты
+  `/module/[id]`, `/lesson/[m]/[l]` не конфликтуют, а старый курс не ломается.
 
 ## Запуск локально
 
@@ -56,13 +79,46 @@ Pyodide и Monaco грузятся с CDN на клиенте — серверу
 - **Дружелюбные ошибки** — типовые traceback переводятся на русский
   (`platform/lib/pyodide.js`, функция `friendlyError`).
 
-## Проверка парсера контента
+### Backend-трек в браузере
+
+Pyodide включает всю стандартную библиотеку (`json`, `sqlite3`, `xml.etree`,
+`base64`, `hashlib`), но не `fastapi`/`sqlalchemy`/сеть. Поэтому авто-тестируемые
+задачи backend-трека написаны на чистом Python (разбор JSON/XML, SQL на sqlite,
+retry/idempotency, маппинг) — они реально запускаются. Темы FastAPI/SQLAlchemy/
+Docker/Git идут через квизы, «найди баг», «собери код» и самопроверку, а живой
+стек — в проекте `enterprise-integration/`.
+
+## Проверка контента
 
 ```bash
-cd platform && npm run check
+cd platform
+npm run check                       # сводка по трекам + проверка минимумов
+node scripts/verify-solutions.mjs   # прогон эталонных решений backend-задач (нужен python3)
 ```
 
-Выводит сводку по модулям: число уроков, экранов и тест-кейсов.
+`npm run check` выводит по каждому треку число уроков, экранов и тест-кейсов и
+проверяет минимумы (≥3 урока, ≥2 практики, ≥3 квиза на модуль).
+`verify-solutions.mjs` исполняет эталонные решения авто-задач и сверяет вывод.
+
+## Финальный проект — Enterprise Integration Simulator
+
+`enterprise-integration/` — рабочий backend (FastAPI + PostgreSQL + SQLAlchemy +
+Alembic + JWT + Docker + pytest), связывающий **mock-SAP** и **mock-банк**:
+создание платежей, отправка в банк, webhook, integration logs, idempotency, retry.
+Настоящих SAP и банка нет — только безопасные моки, секреты только через `.env`.
+
+```bash
+cd enterprise-integration
+cp .env.example .env
+docker compose up --build           # app + PostgreSQL; документация на /docs
+# или локально без Docker (sqlite по умолчанию):
+pip install -r requirements.txt && uvicorn app.main:app --reload
+pytest                              # 22 теста
+alembic upgrade head                # миграции (при AUTO_CREATE_TABLES=false)
+```
+
+Полное описание, endpoints и сценарий «жизнь платежа» — в
+`enterprise-integration/README.md`.
 
 ## Что дальше (за рамками прототипа)
 

@@ -12,6 +12,8 @@ export default async function LessonPage({ params }) {
     <LessonPlayer
       lesson={data.lesson}
       moduleTitle={data.moduleTitle}
+      track={data.track}
+      moduleTrackNum={data.moduleTrackNum}
       prev={data.prev}
       next={data.next}
       moduleLessonIds={data.moduleLessonIds}

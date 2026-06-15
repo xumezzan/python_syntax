@@ -16,6 +16,10 @@ export default function ModulePage({ mod }) {
   }, []);
 
   const { name, icon } = splitIcon(mod.title);
+  const unit = mod.track === 'backend' ? 'Модуль' : 'Глава';
+  const unitNum = mod.trackNum ?? mod.id;
+  const backHref = mod.track === 'backend' ? '/track/backend' : '/';
+  const backLabel = mod.track === 'backend' ? 'Трек' : 'Карта';
   const done = p?.lessons || {};
   const doneCount = mod.lessons.filter((l) => done[l.id]).length;
   const pct = Math.round((doneCount / mod.lessons.length) * 100);
@@ -32,15 +36,15 @@ export default function ModulePage({ mod }) {
   return (
     <div className="chapter">
       <nav className="crumbs2">
-        <Link href="/">Карта</Link>
+        <Link href={backHref}>{backLabel}</Link>
         <span className="sep">/</span>
-        <span className="here">Глава {mod.id}</span>
+        <span className="here">{unit} {unitNum}</span>
       </nav>
 
       <header className="chapter-hero">
         <div className="chapter-glyph">{icon}</div>
         <div className="chapter-info">
-          <span className="eyebrow">Глава {mod.id} · {mod.lessons.length} уроков · до {totalXp} XP</span>
+          <span className="eyebrow">{unit} {unitNum} · {mod.lessons.length} уроков · до {totalXp} XP</span>
           <h1>{name}</h1>
           <ul className="chapter-skills">
             {skills.slice(0, 4).map((s, i) => (

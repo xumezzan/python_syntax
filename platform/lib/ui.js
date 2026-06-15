@@ -12,6 +12,25 @@ export const GLYPHS = {
   'Функции': 'ƒ( )',
   'Ошибки и исключения': '!',
   'Файлы и финал': '▤',
+  // backend-трек — те же код-глифы для единого стиля
+  'HTTP и интернет': '://',
+  'JSON и обмен данными': '{ }',
+  'REST API': '/ /',
+  'FastAPI': '@app',
+  'PostgreSQL и SQL': 'SQL',
+  'SQLAlchemy ORM': 'ORM',
+  'Alembic: миграции': '▲▼',
+  'Авторизация и безопасность API': 'JWT',
+  'Работа с внешними API': '→API',
+  'SOAP и XML': '</>',
+  'Интеграции между системами': 'A→B',
+  'Тестирование backend': '✓✓',
+  'Docker и docker-compose': '▢▢',
+  'Git и командная разработка': 'git',
+  'Логи, ошибки и мониторинг': 'log',
+  'Очереди и фоновые задачи': '[··]',
+  'Основы SAP / ERP': 'SAP',
+  'Финал: Enterprise Integration Simulator': '∎',
 };
 
 export function splitIcon(title) {
@@ -35,4 +54,9 @@ export function pluralDays(n) {
 
 export function lessonMinutes(screens) {
   return Math.max(2, Math.round(screens * 1.5));
+}
+
+// Как называем единицу программы в треке: синтаксис — «Глава», backend — «Модуль».
+export function unitWord(track) {
+  return track === 'backend' ? 'Модуль' : 'Глава';
 }

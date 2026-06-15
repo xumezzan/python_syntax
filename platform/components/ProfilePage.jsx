@@ -10,7 +10,7 @@ import { SKINS } from '@/lib/skins';
 import { getSyncCode, enableSync, pullProgress } from '@/lib/sync';
 import { splitIcon, pluralDays } from '@/lib/ui';
 
-export default function ProfilePage({ modules }) {
+export default function ProfilePage({ modules, tracks = [] }) {
   const [p, setP] = useState(null);
 
   useEffect(() => {
@@ -30,6 +30,15 @@ export default function ProfilePage({ modules }) {
     if (m) screensByModule[m[1]] = (screensByModule[m[1]] || 0) + 1;
   }
   const activeDays = Object.values(p.daily).filter((v) => v > 0).length;
+
+  // группируем модули по трекам; если треков нет в пропсах — один общий список
+  const trackList = tracks.length
+    ? tracks
+    : [{ slug: null, title: null }];
+  const modulesOfTrack = (slug) =>
+    slug ? modules.filter((m) => m.track === slug) : modules;
+  const shortTrackTitle = (title) =>
+    (title || '').replace(/\s*\p{Extended_Pictographic}+\s*$/u, '').split(':')[0].trim();
 
   return (
     <div className="chapter profile">
@@ -63,37 +72,47 @@ export default function ProfilePage({ modules }) {
       {/* ---------- навыки ---------- */}
       <section className="profile-sec">
         <h2>Навыки</h2>
-        <div className="skills">
-          {modules.map((m) => {
-            const { name, icon } = splitIcon(m.title);
-            const pct = Math.round(((screensByModule[m.id] || 0) / m.totalScreens) * 100);
-            return (
-              <Link href={`/module/${m.id}`} className="skill" key={m.id}>
-                <span className="skill-glyph">{icon}</span>
-                <span className="skill-name">{name}</span>
-                <span className="skill-bar"><i style={{ width: pct + '%' }} /></span>
-                <span className="skill-pct">{pct}%</span>
-              </Link>
-            );
-          })}
-        </div>
+        {trackList.map((t) => (
+          <div key={t.slug || 'all'} className="track-group">
+            {t.title && <h3 className="track-group-title">{shortTrackTitle(t.title)}</h3>}
+            <div className="skills">
+              {modulesOfTrack(t.slug).map((m) => {
+                const { name, icon } = splitIcon(m.title);
+                const pct = Math.round(((screensByModule[m.id] || 0) / m.totalScreens) * 100);
+                return (
+                  <Link href={`/module/${m.id}`} className="skill" key={m.id}>
+                    <span className="skill-glyph">{icon}</span>
+                    <span className="skill-name">{name}</span>
+                    <span className="skill-bar"><i style={{ width: pct + '%' }} /></span>
+                    <span className="skill-pct">{pct}%</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </section>
 
       {/* ---------- печати глав ---------- */}
       <section className="profile-sec">
-        <h2>Печати глав</h2>
-        <div className="seals">
-          {modules.map((m) => {
-            const { name, icon } = splitIcon(m.title);
-            const sealed = m.lessonIds.every((id) => p.lessons[id]);
-            return (
-              <Link href={`/module/${m.id}`} key={m.id}
-                className={'seal-slot' + (sealed ? ' sealed' : '')} title={name}>
-                <span className="seal">{sealed ? icon : m.id}</span>
-              </Link>
-            );
-          })}
-        </div>
+        <h2>Печати модулей</h2>
+        {trackList.map((t) => (
+          <div key={t.slug || 'all'} className="track-group">
+            {t.title && <h3 className="track-group-title">{shortTrackTitle(t.title)}</h3>}
+            <div className="seals">
+              {modulesOfTrack(t.slug).map((m) => {
+                const { name, icon } = splitIcon(m.title);
+                const sealed = m.lessonIds.every((id) => p.lessons[id]);
+                return (
+                  <Link href={`/module/${m.id}`} key={m.id}
+                    className={'seal-slot' + (sealed ? ' sealed' : '')} title={name}>
+                    <span className="seal">{sealed ? icon : (m.trackNum ?? m.id)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </section>
 
       {/* ---------- скины Пая ---------- */}

@@ -2,8 +2,9 @@ import './globals.css';
 import TopBar from '@/components/TopBar';
 
 export const metadata = {
-  title: 'PySyntax — Python-синтаксис с нуля',
-  description: 'Интерактивная платформа: теория, код в браузере, подсказки и XP',
+  title: 'PySyntax — Python: от синтаксиса до backend и интеграций',
+  description:
+    'Интерактивная платформа: Python-синтаксис, backend, REST API, базы данных и корпоративные интеграции. Код в браузере, автотесты, подсказки и XP.',
 };
 
 // применяем светлую тему до первой отрисовки — без вспышки

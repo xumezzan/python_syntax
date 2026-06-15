@@ -38,7 +38,9 @@ function pluralPractice(n) {
   return 'практик';
 }
 
-export default function LessonPlayer({ lesson, moduleTitle, prev, next, moduleLessonIds }) {
+export default function LessonPlayer({ lesson, moduleTitle, track, moduleTrackNum, prev, next, moduleLessonIds }) {
+  const unit = track === 'backend' ? 'Модуль' : 'Глава';
+  const unitNum = moduleTrackNum ?? lesson.module;
   const [idx, setIdx] = useState(0);
   const [done, setDone] = useState({});
   const [finished, setFinished] = useState(false);
@@ -122,7 +124,7 @@ export default function LessonPlayer({ lesson, moduleTitle, prev, next, moduleLe
           <div className="big">{f.moduleDone ? '🏅' : lesson.isBoss ? '🏆' : '✓'}</div>
           <h2>
             {f.moduleDone
-              ? `Глава ${lesson.module} пройдена!`
+              ? `${unit} ${unitNum} пройден${unit === 'Глава' ? 'а' : ''}!`
               : `Урок ${lesson.id} пройден!`}
             {f.perfect && <span className="perfect-badge">◉ Идеально</span>}
           </h2>
@@ -189,7 +191,7 @@ export default function LessonPlayer({ lesson, moduleTitle, prev, next, moduleLe
         <nav className="crumbs2">
           <Link href="/">Карта</Link>
           <span className="sep">/</span>
-          <span>Глава {lesson.module} · {cleanModule}</span>
+          <span>{unit} {unitNum} · {cleanModule}</span>
           <span className="sep">/</span>
           <span className="here">Урок {lesson.id}</span>
         </nav>

@@ -61,6 +61,7 @@ export default function TopBar() {
   return (
     <header className="topbar">
       <Link className="logo" href="/">{s?.skin || '🐍'} PySyntax</Link>
+      <Link className="nav-link" href="/roadmap">Роудмап</Link>
       <Link className="nav-link" href="/profile">Профиль</Link>
       <div className="spacer" />
       <button className="theme-toggle" onClick={toggleTheme} title="Светлая/тёмная тема — код остаётся тёмным">

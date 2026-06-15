@@ -8,7 +8,7 @@ import { levelFor } from '@/lib/levels';
 import { splitIcon, cleanTitle, pluralDays } from '@/lib/ui';
 import { QuestStrip, ComebackCard, RecapCard, WeeklyBossCard } from '@/components/DashboardExtras';
 
-export default function CourseMap({ modules }) {
+export default function CourseMap({ modules, otherTracks = [] }) {
   const router = useRouter();
   const [p, setP] = useState(null);
   const [expanded, setExpanded] = useState({});
@@ -125,6 +125,27 @@ export default function CourseMap({ modules }) {
       {p && started && <RecapCard p={p} />}
       {p && started && <WeeklyBossCard p={p} bosses={bosses} />}
       {p && started && <QuestStrip p={p} />}
+
+      {/* ---------- другие треки ---------- */}
+      {otherTracks.length > 0 && (
+        <section className="tracks-strip">
+          <div className="course-line">
+            <span>Что дальше</span>
+            <Link className="dim track-roadmap-link" href="/roadmap">Роудмап →</Link>
+          </div>
+          {otherTracks.map((t) => (
+              <Link className="track-card" href={`/track/${t.slug}`} key={t.slug}>
+                <div className="track-ico">{t.icon}</div>
+                <div className="track-body">
+                  <span className="eyebrow">Новый трек · {t.modules} модулей · {t.lessons} уроков</span>
+                  <h3>{t.title}</h3>
+                  <p>{t.short}</p>
+                </div>
+                <span className="track-go">Открыть трек →</span>
+              </Link>
+          ))}
+        </section>
+      )}
 
       {/* ---------- тропа ---------- */}
       <div className="course-line">

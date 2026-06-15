@@ -7,6 +7,14 @@ out/
 platform/data/
 data/
 
+# python (enterprise-integration)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.db
+
 # системное
 .DS_Store
 *.log

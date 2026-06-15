@@ -8,16 +8,68 @@ import path from 'node:path';
 
 const XP = { fill: 10, task: 15, quiz: 10, bug: 10, puzzle: 10, boss: 50, theory: 0 };
 
+// Реестр учебных треков. Каждый трек — папка с module-XX.md.
+// Глобальные id модулей сквозные (синтаксис 1..10, backend 11..28), поэтому
+// ключи прогресса и роуты /module/[id], /lesson/[m]/[l] не конфликтуют.
+// В файлах и интерфейсе модуль показывается под локальным номером (trackNum).
+export const TRACKS = [
+  {
+    slug: 'syntax',
+    subdir: null,
+    icon: '🐍',
+    title: 'Python-синтаксис с нуля',
+    short:
+      'Базовый трек: print, переменные, условия, циклы, строки, списки, словари, функции, ошибки и файлы — код прямо в браузере.',
+    home: true, // показывается на главной как основной курс
+  },
+  {
+    slug: 'backend',
+    subdir: 'backend',
+    icon: '⚙️',
+    title: 'Python Backend: API, базы данных и интеграции',
+    short:
+      'Создавайте backend на Python, проектируйте REST API, работайте с PostgreSQL, подключайте внешние сервисы, разбирайтесь в SOAP/XML, тестах, Docker и корпоративных интеграциях уровня SAP/банк.',
+    home: false,
+  },
+];
+
 export function loadCourse() {
-  const dir = findContentDir();
-  const files = fs
-    .readdirSync(dir)
-    .filter((f) => /^module-\d+\.md$/.test(f))
-    .sort();
-  const modules = files.map((f, i) =>
-    parseModule(fs.readFileSync(path.join(dir, f), 'utf8'), i + 1)
-  );
-  return { modules };
+  const base = findContentDir();
+  const modules = [];
+  const tracks = [];
+  let nextId = 1;
+  for (const t of TRACKS) {
+    const dir = t.subdir ? path.join(base, t.subdir) : base;
+    if (!fs.existsSync(dir)) {
+      tracks.push({ ...t, moduleIds: [] });
+      continue;
+    }
+    const files = fs
+      .readdirSync(dir)
+      .filter((f) => /^module-\d+\.md$/.test(f))
+      .sort();
+    const ids = [];
+    files.forEach((f, i) => {
+      const mod = parseModule(fs.readFileSync(path.join(dir, f), 'utf8'), nextId);
+      mod.track = t.slug;
+      mod.trackNum = i + 1;
+      modules.push(mod);
+      ids.push(nextId);
+      nextId += 1;
+    });
+    tracks.push({ ...t, moduleIds: ids });
+  }
+  return { modules, tracks };
+}
+
+/** Все модули одного трека (для страницы трека и роудмапа). */
+export function trackModules(course, slug) {
+  return course.modules.filter((m) => m.track === slug);
+}
+
+/** Метаданные трека по slug. */
+export function getTrack(course, slug) {
+  return course.tracks.find((t) => t.slug === slug) || null;
 }
 
 export function getLesson(course, moduleId, lessonNum) {
@@ -26,16 +78,19 @@ export function getLesson(course, moduleId, lessonNum) {
   const idx = mod.lessons.findIndex((l) => l.num === Number(lessonNum));
   if (idx === -1) return null;
   const lesson = mod.lessons[idx];
-  const prev = idx > 0 ? mod.lessons[idx - 1] : lastLessonOf(course, mod.id - 1);
+  // prev/next не пересекают границу трека: каждый трек — самостоятельный путь
+  const prev = idx > 0 ? mod.lessons[idx - 1] : lastLessonOf(course, mod.id - 1, mod.track);
   const next =
     idx < mod.lessons.length - 1
       ? mod.lessons[idx + 1]
-      : firstLessonOf(course, mod.id + 1);
+      : firstLessonOf(course, mod.id + 1, mod.track);
   const brief = (l) =>
     l ? { module: l.module, num: l.num, title: l.title, screens: l.screens.length } : null;
   return {
     lesson,
     moduleTitle: mod.title,
+    track: mod.track,
+    moduleTrackNum: mod.trackNum,
     prev: brief(prev),
     next: brief(next),
     moduleLessonIds: mod.lessons.map((l) => l.id),
@@ -48,6 +103,8 @@ export function getModule(course, moduleId) {
   if (!mod) return null;
   return {
     id: mod.id,
+    track: mod.track,
+    trackNum: mod.trackNum,
     title: mod.title,
     goal: mod.goal,
     boss: mod.boss,
@@ -63,13 +120,13 @@ export function getModule(course, moduleId) {
   };
 }
 
-function lastLessonOf(course, moduleId) {
+function lastLessonOf(course, moduleId, track) {
   const m = course.modules.find((x) => x.id === moduleId);
-  return m ? m.lessons[m.lessons.length - 1] : null;
+  return m && (!track || m.track === track) ? m.lessons[m.lessons.length - 1] : null;
 }
-function firstLessonOf(course, moduleId) {
+function firstLessonOf(course, moduleId, track) {
   const m = course.modules.find((x) => x.id === moduleId);
-  return m ? m.lessons[0] : null;
+  return m && (!track || m.track === track) ? m.lessons[0] : null;
 }
 
 function findContentDir() {
